@@ -92,4 +92,11 @@ public class Login extends JFrame{
         
         getContentPane().setBackground(new Color(2, 0, 0));
     }
+    public static void main(String[] args) {
+        Login loginGUI = new Login();
+        loginGUI.setTitle("Client");
+        loginGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginGUI.setSize(430, 500);
+        loginGUI.setVisible(true);
+    }
 }
