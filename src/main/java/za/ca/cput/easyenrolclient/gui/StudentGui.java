@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package za.ca.cput.easyenrolclient.gui;
 import java.awt.BorderLayout;
 import java.awt.Font;
@@ -11,7 +8,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author 240971051
  */
-public class StudenttGui extends JFrame {
+public class StudentGui extends JFrame {
     private JLabel lbl ,lbl2,lbl3;
     private JTable table;
     private DefaultTableModel model;
@@ -20,7 +17,7 @@ public class StudenttGui extends JFrame {
     private JTabbedPane tpane ;
     
     
-    public StudenttGui(){    
+    public StudentGui(){    
      super();
     pnl1 = new JPanel();
     lbl = new JLabel("EasyEnroll");
@@ -32,7 +29,7 @@ public class StudenttGui extends JFrame {
    //  lbl2 = new JLabel("Available courses");
      pnl2 = new JPanel();
     // pnl2.add(lbl2);
-    String[] Column = {"Subject Code", "Subject Name"};
+    String[] Column = {" Code", "Subject Name"};
     String[][]subjects = {{"ISA262S", "Information Systems Analysis"},
                            {"MAF152S", "Multimedia Applications Fundamentals"},
                            {"ADP262S" , "Applications Development Practice"},
@@ -72,7 +69,7 @@ public class StudenttGui extends JFrame {
     
 }
      public static void main(String[] args) {
-          StudenttGui mygui = new StudenttGui();
+          StudentGui mygui = new StudentGui();
            mygui.setTitle("EasyEnrol");
            mygui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
            mygui.setSize(700, 600);

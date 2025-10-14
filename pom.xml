@@ -11,4 +11,11 @@
         <maven.compiler.target>21</maven.compiler.target>
         <exec.mainClass>za.ca.cput.easyenrolclient.EasyEnrolClient</exec.mainClass>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.derby</groupId>
+            <artifactId>derbyclient</artifactId>
+            <version>10.17.1.0</version>
+        </dependency>
+    </dependencies>
 </project>
