@@ -15,10 +15,11 @@ public class StudentGui extends JFrame {
     private JPanel pnl1 , pnl2,pnl3,pnl4;
     private JButton enroll, Cancel;
     private JTabbedPane tpane ;
+    private static String studentId;
     
-    
-    public StudentGui(){    
-     super();
+    public StudentGui(String studentId){
+        this.studentId = studentId;
+     
     pnl1 = new JPanel();
     lbl = new JLabel("EasyEnroll");
     lbl.setFont(new Font("Ariel", Font.BOLD, 24));
@@ -69,7 +70,7 @@ public class StudentGui extends JFrame {
     
 }
      public static void main(String[] args) {
-          StudentGui mygui = new StudentGui();
+          StudentGui mygui = new StudentGui(studentId);
            mygui.setTitle("EasyEnrol");
            mygui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
            mygui.setSize(700, 600);
