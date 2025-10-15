@@ -13,10 +13,16 @@ public class Course {
     }
 
     public Course(int courseId, String courseCode, String courseName) {
+        this.courseCode = courseCode;
+        this.courseName = courseName;
         this.courseId = courseId;
+    }
+
+    public Course(String courseCode, String courseName) {
         this.courseCode = courseCode;
         this.courseName = courseName;
     }
+    
 
     public void setCourseId(int courseId) {
         this.courseId = courseId;

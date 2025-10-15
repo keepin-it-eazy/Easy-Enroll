@@ -11,6 +11,7 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFrame;
+import za.ca.cput.easyenrolclient.domain.enrollment;
 import za.ca.cput.easyenrolclient.gui.Login;
 
 /**
@@ -66,6 +67,23 @@ public class Client {
         }
         
     }
+    
+    
+    public static void sendEnrollment (enrollment enroll){
+        
+        try {
+            out.writeObject(enroll);
+            out.flush();
+            String response = (String) in.readObject();
+            System.out.println("From SERVER>> " + response);
+        } catch (IOException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    
 
     public static void main(String[] args) {
 
