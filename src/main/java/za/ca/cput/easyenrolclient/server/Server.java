@@ -12,7 +12,8 @@ import java.net.Socket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import za.ca.cput.easyenrolclient.dao.LoginDAO;
-
+import za.ca.cput.easyenrolclient.dao.enrollDao;
+import za.ca.cput.easyenrolclient.domain.enrollment;
 
 /**
  *
@@ -65,6 +66,34 @@ public class Server {
             e.printStackTrace();
         } catch (ClassNotFoundException ex) {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static void processEnrollment(enrollment enroll) {
+        ObjectOutputStream out = null;
+        try {
+            out = new ObjectOutputStream(socket.getOutputStream());
+            out.flush();
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+             enrollment tempEnroll;
+            while (( tempEnroll = (enrollment) in.readObject()) != null) {
+                
+                enrollDao dao = new enrollDao();
+                dao.Enrollment(tempEnroll);
+                String response = "Enrollment successful for student: " + enroll.getStudentid();
+                out.writeObject(response);
+                out.flush();
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                out.close();
+            } catch (IOException ex) {
+                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
 

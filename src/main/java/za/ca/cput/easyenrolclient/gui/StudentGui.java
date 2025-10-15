@@ -2,20 +2,34 @@
 package za.ca.cput.easyenrolclient.gui;
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import za.ca.cput.easyenrolclient.Client;
+import za.ca.cput.easyenrolclient.dao.enrollDao;
+import za.ca.cput.easyenrolclient.domain.Course;
+import za.ca.cput.easyenrolclient.domain.enrollment;
 /**
  *
  * @author 240971051
  */
 public class StudentGui extends JFrame {
     private JLabel lbl ,lbl2,lbl3;
-    private JTable table;
-    private DefaultTableModel model;
+    private JTable table, tbl;
+    private DefaultTableModel model,dfmodel;
     private JPanel pnl1 , pnl2,pnl3,pnl4;
     private JButton enroll, Cancel;
     private JTabbedPane tpane ;
     private static String studentId;
+    enrollDao dao = new enrollDao();
+    private Socket server;
+    private ObjectOutputStream out;
+    private ObjectInputStream in;
     
     public StudentGui(String studentId){
         this.studentId = studentId;
@@ -45,10 +59,20 @@ public class StudentGui extends JFrame {
       table = new JTable(model);
        JScrollPane scrollPane = new JScrollPane(table);
       pnl2.add(scrollPane);
-     lbl3 = new JLabel("My Courses");
+
      pnl3 = new JPanel();
-     pnl3.add(lbl3);
-    
+
+       
+        pnl3 = new JPanel();
+        String[] myColumnNames = {"Subject Code", "Subject name"};
+        String[][] mySubjects = {{}};
+        dfmodel = new DefaultTableModel(myColumnNames, 0);
+        tbl = new JTable(dfmodel);
+        JScrollPane scrllpane = new JScrollPane(tbl);
+        pnl3.add(scrllpane);
+
+     
+        tpane.addTab("my Courses", pnl3);
      tpane.addTab("Available courses", pnl2);
     tpane.addTab("my Courses", pnl3);
     
@@ -59,14 +83,49 @@ public class StudentGui extends JFrame {
       Cancel = new JButton("Cancel");
         pnl4.add(Cancel);
         
+        
+        
+        
+        
     add(pnl1,BorderLayout.NORTH);
     add(pnl4,BorderLayout.SOUTH);
     add(tpane);
      
      
       
-    
-    
+        enroll.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+
+                int[] selectedRows = table.getSelectedRows();
+
+                ArrayList<Course> selectedCourses = new ArrayList<>();
+
+                for (int row : selectedRows) {
+
+                    String courseId = table.getValueAt(row, 0).toString();
+                    String courseName = table.getValueAt(row, 1).toString();
+                    selectedCourses.add(new Course(courseId, courseName));
+                    dfmodel.addRow(new Object[]{courseId, courseName});
+                }
+
+                for (Course course : selectedCourses) {
+                    System.out.println(course.getCourseId() + course.getCourseName());
+                }
+                enrollment enroll = new enrollment(studentId, selectedCourses);
+             Client.sendEnrollment(enroll);
+                
+            }
+              
+        });
+      Cancel.addActionListener(new ActionListener(){
+       public void actionPerformed(ActionEvent e){
+           if(e.getSource() == Cancel){
+            System.exit(0);  
+       }
+          
+       }  
+});
     
 }
      public static void main(String[] args) {
