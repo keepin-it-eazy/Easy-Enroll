@@ -5,6 +5,7 @@
 package za.ca.cput.easyenrolclient.gui;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -97,8 +98,16 @@ public class Login extends JFrame {
                     myGUI.setSize(500, 700);
                     myGUI.setVisible(true);
                 }else if("admin".equalsIgnoreCase(response)){
-                    //construct admin dashboard
-                    JOptionPane.showMessageDialog(null, "This would trigger student dashboard");
+                    
+                    JOptionPane.showMessageDialog(null, "Login successful!");
+                    dispose();
+                    
+                    AdminGui admin = new AdminGui();
+                    admin.setTitle("Easy Enrol");
+                    admin.setPreferredSize(new Dimension(600, 400)); 
+                    admin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                    admin.setLocationRelativeTo(null);
+                    admin.setResizable(true);
                 }
                 else {
                     JOptionPane.showMessageDialog(null, "Invalid credentials. Please try again.");

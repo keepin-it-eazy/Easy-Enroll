@@ -24,6 +24,8 @@ public class Server {
     private static ServerSocket listener;
     private static Socket socket;
     private static LoginDAO dao;
+    private static ObjectOutputStream out;
+    private static ObjectInputStream in;
 
     public static void listen() {
         // Start listening for client connections
@@ -31,6 +33,9 @@ public class Server {
             listener = new ServerSocket(6666, 1);
             System.out.println("Server is listening");
             socket = listener.accept();
+            out = new ObjectOutputStream(socket.getOutputStream());
+            out.flush();
+            in = new ObjectInputStream(socket.getInputStream());
             System.out.println("Now moving onto authenticating client");
             receiveData();
         } catch (IOException ioe) {
@@ -41,14 +46,11 @@ public class Server {
 
     public static void receiveData() {
         try {
-            ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 
             String username, password;
             boolean loggedIn = false;
 
-            while (!loggedIn) {
+            while (true) {
                 username = (String) in.readObject();
                 password = (String) in.readObject();
                 dao = new LoginDAO();
@@ -59,41 +61,39 @@ public class Server {
 
                 if (!response.equalsIgnoreCase("invalid")) {
                     loggedIn = true; // exit loop once valid
+                    processEnrollment();
                 }
             }
 
         } catch (IOException e) {
+            System.out.println("IO Exception at ReceiveData");
             e.printStackTrace();
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("ClassNotFound Exception at ReceiveData");
+            ex.printStackTrace();
         }
     }
 
-    public static void processEnrollment(enrollment enroll) {
-        ObjectOutputStream out = null;
+    public static void processEnrollment() {
+
         try {
-            out = new ObjectOutputStream(socket.getOutputStream());
-            out.flush();
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
-             enrollment tempEnroll;
-            while (( tempEnroll = (enrollment) in.readObject()) != null) {
-                
+
+            enrollment tempEnroll;
+            while ((tempEnroll = (enrollment) in.readObject()) != null) {
+
                 enrollDao dao = new enrollDao();
-                dao.Enrollment(tempEnroll);
-                String response = "Enrollment successful for student: " + enroll.getStudentid();
+                String response;
+                response = dao.Enrollment(tempEnroll);
+
                 out.writeObject(response);
                 out.flush();
             }
         } catch (IOException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println("IO Exception at processEnrollment: ");
+            ex.printStackTrace();
         } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                out.close();
-            } catch (IOException ex) {
-                Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            System.out.println("Class not found exception: ");
+            ex.printStackTrace();
         }
     }
 

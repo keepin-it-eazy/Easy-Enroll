@@ -4,7 +4,9 @@
  */
 package za.ca.cput.easyenrolclient.domain;
 
-public class Course {
+import java.io.Serializable;
+
+public class Course implements Serializable{
     private int courseId;
     private String courseCode;
     private String courseName;

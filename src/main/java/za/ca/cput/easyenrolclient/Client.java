@@ -32,11 +32,7 @@ public class Client {
             out = new ObjectOutputStream(socket.getOutputStream());
             out.flush();
             in = new ObjectInputStream(socket.getInputStream());
-        Login loginGUI = new Login();
-        loginGUI.setTitle("Client");
-        loginGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        loginGUI.setSize(430, 500);
-        loginGUI.setVisible(true);
+        
         } catch (IOException ex) {
             ex.printStackTrace();
         }
@@ -69,18 +65,18 @@ public class Client {
     }
     
     
-    public static void sendEnrollment (enrollment enroll){
+    public static String sendEnrollment (enrollment enroll){
         
         try {
             out.writeObject(enroll);
             out.flush();
             String response = (String) in.readObject();
             System.out.println("From SERVER>> " + response);
-        } catch (IOException ex) {
+            return response;
+        } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ClassNotFoundException ex) {
-            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        }
+            return "failed";
+        } 
     }
     
     
@@ -88,7 +84,11 @@ public class Client {
     public static void main(String[] args) {
 
         Client.connect();
-
+        Login loginGUI = new Login();
+        loginGUI.setTitle("Client");
+        loginGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        loginGUI.setSize(430, 500);
+        loginGUI.setVisible(true);
     }
 }
 
