@@ -39,8 +39,8 @@ public class enrollDao {
        
        }
                
-      public void Enrollment(enrollment enroll) {
-        String query = "INSERT INTO ENROLLMENT ( STUDENT_ID, COURSE_ID,COURSE_NAME) VALUES ( ?, ?,?)";
+      public String Enrollment(enrollment enroll) {
+        String query = "INSERT INTO ENROLLMENT ( STUDENTID, COURSECODE, COURSENAME) VALUES ( ?,?,?)";
         try (PreparedStatement pstmt = con.prepareStatement(query)) {
             ArrayList<Course> courses = enroll.getCourses();
             for ( Course course : courses) {
@@ -52,12 +52,17 @@ public class enrollDao {
             }
             int i[] = pstmt.executeBatch();
             for (int arr : i){
-                System.out.println(arr);
+                if (arr <= 0){
+                    return "failed";
+                }
             }
+            return "success";
             
         } catch (SQLException ex) {
             Logger.getLogger(enrollDao.class.getName()).log(Level.SEVERE, null, ex);
+            return "failed";
         }
+        
 
     }    
                

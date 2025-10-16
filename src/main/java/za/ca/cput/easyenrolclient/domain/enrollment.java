@@ -4,13 +4,14 @@
  */
 package za.ca.cput.easyenrolclient.domain;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  *
  * @author 240971051
  */
-public class enrollment {
+public class enrollment implements Serializable{
 
     private String Studentid;
 
