@@ -1,153 +1,194 @@
+
+
 package za.ca.cput.easyenrolclient.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import za.ca.cput.easyenrolclient.Client;
-import za.ca.cput.easyenrolclient.dao.enrollDao;
 import za.ca.cput.easyenrolclient.domain.Course;
 import za.ca.cput.easyenrolclient.domain.enrollment;
 
-/**
- *
- * @author 240971051
- */
 public class StudentGui extends JFrame {
 
-    private JLabel lbl, lbl2, lbl3;
+    private JLabel lbl;
     private JTable table, tbl;
     private DefaultTableModel model, dfmodel;
     private JPanel pnl1, pnl2, pnl3, pnl4;
-    private JButton enroll, Cancel;
+    private JButton enroll, Cancel, refreshBtn;
     private JTabbedPane tpane;
-    private static String studentId;
-    enrollDao dao = new enrollDao();
-    private Socket server;
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
+    private String studentEmail; // Changed to email to match enrollment table
     private ArrayList<Course> selectedCourses = new ArrayList<>();
-    private ArrayList<Course> duplicates = new ArrayList<>();
 
-    public StudentGui(String studentId) {
-        this.studentId = studentId;
+    public StudentGui(String studentEmail) {
+        this.studentEmail = studentEmail;
 
+        initializeGUI();
+        loadAvailableCourses();
+    }
+
+    private void initializeGUI() {
         pnl1 = new JPanel();
-        lbl = new JLabel("EasyEnroll");
-        lbl.setFont(new Font("Ariel", Font.BOLD, 24));
+        lbl = new JLabel("EasyEnroll - Welcome, " + studentEmail);
+        lbl.setFont(new Font("Ariel", Font.BOLD, 20));
         pnl1.add(lbl);
 
         tpane = new JTabbedPane();
-        //  lbl2 = new JLabel("Available courses");
-        pnl2 = new JPanel();
-        // pnl2.add(lbl2);
-        String[] Column = {" Code", "Subject Name"};
-        String[][] subjects = {{"ISA262S", "Information Systems Analysis"},
-        {"MAF152S", "Multimedia Applications Fundamentals"},
-        {"ADP262S", "Applications Development Practice"},
-        {"ADF262S", "Applications Development Fundamentals"},
-        {"ICE262S", "Artificial Intelligence"},
-        {"CNF262S", "Communications Networks Fundamentals"},
-        {"PRT262S", "Project"},
-        {"INM262S", "Information Management"},
-        {"PRC262S", "Professionals Communications"}};
 
-        model = new DefaultTableModel(subjects, Column);
+        // Available Courses Panel
+        pnl2 = new JPanel(new BorderLayout());
+        String[] columns = {"Course Code", "Course Name"};
+        model = new DefaultTableModel(columns, 0);
         table = new JTable(model);
         JScrollPane scrollPane = new JScrollPane(table);
-        pnl2.add(scrollPane);
+        pnl2.add(new JLabel("Available Courses:"), BorderLayout.NORTH);
+        pnl2.add(scrollPane, BorderLayout.CENTER);
 
-        pnl3 = new JPanel();
+        // Refresh button
+        refreshBtn = new JButton("Refresh Courses");
+        refreshBtn.addActionListener(e -> loadAvailableCourses());
+        pnl2.add(refreshBtn, BorderLayout.SOUTH);
 
-        pnl3 = new JPanel();
-        String[] myColumnNames = {"Subject Code", "Subject name"};
-        String[][] mySubjects = {{}};
-        dfmodel = new DefaultTableModel(myColumnNames, 0);
+        // My Courses Panel
+        pnl3 = new JPanel(new BorderLayout());
+        String[] myColumns = {"Course Code", "Course Name"};
+        dfmodel = new DefaultTableModel(myColumns, 0);
         tbl = new JTable(dfmodel);
-        JScrollPane scrllpane = new JScrollPane(tbl);
-        pnl3.add(scrllpane);
+        JScrollPane myScrollPane = new JScrollPane(tbl);
+        pnl3.add(new JLabel("My Selected Courses:"), BorderLayout.NORTH);
+        pnl3.add(myScrollPane, BorderLayout.CENTER);
 
-        tpane.addTab("my Courses", pnl3);
-        tpane.addTab("Available courses", pnl2);
-        tpane.addTab("my Courses", pnl3);
+        tpane.addTab("Available Courses", pnl2);
+        tpane.addTab("My Selected Courses", pnl3);
 
+        // Buttons Panel
         pnl4 = new JPanel();
-        enroll = new JButton("Enroll");
+        enroll = new JButton("Enroll Selected");
         pnl4.add(enroll);
         Cancel = new JButton("Cancel");
         pnl4.add(Cancel);
 
         add(pnl1, BorderLayout.NORTH);
+        add(tpane, BorderLayout.CENTER);
         add(pnl4, BorderLayout.SOUTH);
-        add(tpane);
 
-        enroll.addActionListener(new ActionListener() {
+        setupEventHandlers();
+    }
 
-            public void actionPerformed(ActionEvent e) {
-
-                int[] selectedRows = table.getSelectedRows();
-
-                
-
-                for (int row : selectedRows) {
-
-                    String courseId = table.getValueAt(row, 0).toString();
-                    String courseName = table.getValueAt(row, 1).toString();
-                    selectedCourses.add(new Course(courseId, courseName));
-                    dfmodel.addRow(new Object[]{courseId, courseName});
-                }
-                boolean hasDuplicates = false;
-                
-                for (int i = 0; i < selectedCourses.size(); i++) {
-                    for (int j = i + 1; j < selectedCourses.size(); j++) {
-                        if (selectedCourses.get(i).getCourseCode().equals(selectedCourses.get(j).getCourseCode()) && !duplicates.contains(selectedCourses.get(i))) {
-                            hasDuplicates = true;
-                            duplicates.add(selectedCourses.get(i));
-                            break;
-                        }
-                    }
-                }
-                System.out.println(duplicates.toString());
-                if (hasDuplicates) {
-                    JOptionPane.showMessageDialog(null, "You have already chosen this course");
-                    return;
-                } else {
-                    enrollment enroll = new enrollment(studentId, selectedCourses);
-                    String response = Client.sendEnrollment(enroll);
-                    if (response.equalsIgnoreCase("success")) {
-                        JOptionPane.showMessageDialog(null, "Successfully enrolled");
-                        
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Enrollment unsuccessful");
-                    }
-                }
-
+    private void loadAvailableCourses() {
+        try {
+            // Clear existing courses
+            model.setRowCount(0);
+            
+            // Get courses from server via client
+            ArrayList<Course> courses = Client.getAvailableCourses();
+            
+            // Populate table with courses
+            for (Course course : courses) {
+                model.addRow(new Object[]{
+                    course.getCourseCode(),
+                    course.getCourseName()
+                });
             }
+            
+            if (courses.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No courses available.", "Info", JOptionPane.INFORMATION_MESSAGE);
+            }
+            
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error loading courses: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }
 
+    private void setupEventHandlers() {
+        enroll.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                enrollSelectedCourses();
+            }
         });
+
         Cancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (e.getSource() == Cancel) {
+                int response = JOptionPane.showConfirmDialog(StudentGui.this, 
+                    "Are you sure you want to exit?", "Confirm Exit", 
+                    JOptionPane.YES_NO_OPTION);
+                if (response == JOptionPane.YES_OPTION) {
                     System.exit(0);
                 }
-
             }
         });
+    }
 
+    private void enrollSelectedCourses() {
+        int[] selectedRows = table.getSelectedRows();
+        
+        if (selectedRows.length == 0) {
+            JOptionPane.showMessageDialog(this, "Please select at least one course to enroll.", "No Selection", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        selectedCourses.clear();
+        
+        // Get selected courses
+        for (int row : selectedRows) {
+            String courseCode = table.getValueAt(row, 0).toString();
+            String courseName = table.getValueAt(row, 1).toString();
+            selectedCourses.add(new Course(courseCode, courseName));
+            
+            // Add to my courses table
+            dfmodel.addRow(new Object[]{courseCode, courseName});
+        }
+
+        // Check for duplicates in selection
+        if (hasDuplicateSelections()) {
+            JOptionPane.showMessageDialog(this, "You have selected duplicate courses. Please check your selection.", "Duplicate Courses", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        // Send enrollment to server
+        enrollment enrollRequest = new enrollment(studentEmail, selectedCourses);
+        String response = Client.sendEnrollment(enrollRequest);
+        
+        if ("success".equalsIgnoreCase(response)) {
+            JOptionPane.showMessageDialog(this, "Successfully enrolled in " + selectedCourses.size() + " course(s)!", "Enrollment Success", JOptionPane.INFORMATION_MESSAGE);
+            clearSelection();
+        } else if ("duplicate".equalsIgnoreCase(response)) {
+            JOptionPane.showMessageDialog(this, "You are already enrolled in one or more of these courses.", "Duplicate Enrollment", JOptionPane.WARNING_MESSAGE);
+        } else {
+           // JOptionPane.showMessageDialog(this, "Enrollment failed. Please try again.", "Enrollment Failed", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private boolean hasDuplicateSelections() {
+        for (int i = 0; i < selectedCourses.size(); i++) {
+            for (int j = i + 1; j < selectedCourses.size(); j++) {
+                if (selectedCourses.get(i).getCourseCode().equals(selectedCourses.get(j).getCourseCode())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void clearSelection() {
+        table.clearSelection();
+        selectedCourses.clear();
     }
 
     public static void main(String[] args) {
-        StudentGui mygui = new StudentGui(studentId);
-        mygui.setTitle("EasyEnrol");
-        mygui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mygui.setSize(700, 600);
-        mygui.setVisible(true);
-
+        // For testing only - in real usage, studentEmail comes from login
+        SwingUtilities.invokeLater(() -> {
+            StudentGui mygui = new StudentGui("test@example.com");
+            mygui.setTitle("EasyEnrol - Student Portal");
+            mygui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            mygui.setSize(800, 600);
+            mygui.setLocationRelativeTo(null);
+            mygui.setVisible(true);
+        });
     }
 }
