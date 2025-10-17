@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package za.ca.cput.easyenrolclient.dao;
 
 import java.sql.Connection;
@@ -15,52 +12,55 @@ import javax.swing.JOptionPane;
 import za.ca.cput.easyenrolclient.connection.DBConnection;
 import za.ca.cput.easyenrolclient.domain.Course;
 import za.ca.cput.easyenrolclient.domain.enrollment;
-
 /**
  *
  * @author 240971051
  */
 public class EnrollDao {
-
+    
     private Connection con;
     private ResultSet rs;
     private PreparedStatement pstmt;
-
-    public EnrollDao() {
-
-        try {
+    
+    
+       public EnrollDao(){
+       
+         try {
             this.con = DBConnection.derbyConnection();
         } catch (Exception exception) {
             JOptionPane.showMessageDialog(null, exception.getMessage());
 
         }
-
-    }
-
-    public String Enrollment(enrollment enroll) {
+         
+         
+       
+       }
+               
+      public String Enrollment(enrollment enroll) {
         String query = "INSERT INTO ENROLLMENT ( STUDENT_ID, COURSE_CODE, COURSE_NAME) VALUES ( ?,?,?)";
         try (PreparedStatement pstmt = con.prepareStatement(query)) {
             ArrayList<Course> courses = enroll.getCourses();
-            for (Course course : courses) {
+            for ( Course course : courses) {
                 pstmt.setString(1, enroll.getStudentEmail());
                 pstmt.setString(2, course.getCourseCode());
                 pstmt.setString(3, course.getCourseName());
                 pstmt.addBatch();
-
+                
             }
             int i[] = pstmt.executeBatch();
-            for (int arr : i) {
-                if (arr <= 0) {
+            for (int arr : i){
+                if (arr <= 0){
                     return "failed";
                 }
             }
             return "success";
-
+            
         } catch (SQLException ex) {
             Logger.getLogger(EnrollDao.class.getName()).log(Level.SEVERE, null, ex);
             return "failed";
         }
+        
 
-    }
-
+    }    
+               
 }
