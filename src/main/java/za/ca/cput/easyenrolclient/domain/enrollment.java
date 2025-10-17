@@ -13,23 +13,24 @@ import java.util.ArrayList;
  */
 public class enrollment implements Serializable{
 
-    private String Studentid;
+    private int Studentid;
 
     private ArrayList<Course> courses;
 
-    public enrollment(String Studentid, ArrayList<Course> courses) {
+    public enrollment(int Studentid, ArrayList<Course> courses) {
         this.Studentid = Studentid;
-
         this.courses = courses;
     }
 
-    public String getStudentid() {
+    public int getStudentid() {
         return Studentid;
     }
 
-    public void setStudentid(String Studentid) {
+    public void setStudentid(int Studentid) {
         this.Studentid = Studentid;
     }
+
+    
 
     public ArrayList<Course> getCourses() {
         return courses;

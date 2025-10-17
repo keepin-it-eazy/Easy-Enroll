@@ -1,7 +1,9 @@
 package za.ca.cput.easyenrolclient.domain;
 
+import java.io.Serializable;
 
-public class Student {
+
+public class Student implements Serializable{
 
     private int StudentId;
     private String name;

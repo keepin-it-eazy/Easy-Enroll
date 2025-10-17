@@ -27,7 +27,7 @@ public class StudentGui extends JFrame {
     private JPanel pnl1, pnl2, pnl3, pnl4;
     private JButton enroll, Cancel;
     private JTabbedPane tpane;
-    private static String studentId;
+    private static int studentId;
     enrollDao dao = new enrollDao();
     private Socket server;
     private ObjectOutputStream out;
@@ -35,8 +35,8 @@ public class StudentGui extends JFrame {
     private ArrayList<Course> selectedCourses = new ArrayList<>();
     private ArrayList<Course> duplicates = new ArrayList<>();
 
-    public StudentGui(String studentId) {
-        this.studentId = studentId;
+    public StudentGui(int id) {
+        this.studentId = id;
 
         pnl1 = new JPanel();
         lbl = new JLabel("EasyEnroll");
@@ -44,22 +44,17 @@ public class StudentGui extends JFrame {
         pnl1.add(lbl);
 
         tpane = new JTabbedPane();
-        //  lbl2 = new JLabel("Available courses");
+        
         pnl2 = new JPanel();
-        // pnl2.add(lbl2);
+       
         String[] Column = {" Code", "Subject Name"};
-        String[][] subjects = {{"ISA262S", "Information Systems Analysis"},
-        {"MAF152S", "Multimedia Applications Fundamentals"},
-        {"ADP262S", "Applications Development Practice"},
-        {"ADF262S", "Applications Development Fundamentals"},
-        {"ICE262S", "Artificial Intelligence"},
-        {"CNF262S", "Communications Networks Fundamentals"},
-        {"PRT262S", "Project"},
-        {"INM262S", "Information Management"},
-        {"PRC262S", "Professionals Communications"}};
-
-        model = new DefaultTableModel(subjects, Column);
+        model = new DefaultTableModel(Column, 0);
         table = new JTable(model);
+        ArrayList<Course> courseList = Client.getAvailableCourses();
+        for (Course c : courseList) {
+            model.addRow(new Object[]{c.getCourseCode(), c.getCourseName()});
+        }
+
         JScrollPane scrollPane = new JScrollPane(table);
         pnl2.add(scrollPane);
 
@@ -88,46 +83,49 @@ public class StudentGui extends JFrame {
         add(tpane);
 
         enroll.addActionListener(new ActionListener() {
-
+            
             public void actionPerformed(ActionEvent e) {
-
                 int[] selectedRows = table.getSelectedRows();
-
-                
+                ArrayList<Course> newCourses = new ArrayList<>();
 
                 for (int row : selectedRows) {
-
                     String courseId = table.getValueAt(row, 0).toString();
                     String courseName = table.getValueAt(row, 1).toString();
-                    selectedCourses.add(new Course(courseId, courseName));
-                    dfmodel.addRow(new Object[]{courseId, courseName});
-                }
-                boolean hasDuplicates = false;
-                
-                for (int i = 0; i < selectedCourses.size(); i++) {
-                    for (int j = i + 1; j < selectedCourses.size(); j++) {
-                        if (selectedCourses.get(i).getCourseCode().equals(selectedCourses.get(j).getCourseCode()) && !duplicates.contains(selectedCourses.get(i))) {
-                            hasDuplicates = true;
-                            duplicates.add(selectedCourses.get(i));
+
+                    Course newCourse = new Course(courseId, courseName);
+                    boolean alreadyChosen = false;
+
+                    
+                    for (Course c : selectedCourses) {
+                        if (c.getCourseCode().equals(newCourse.getCourseCode())) {
+                            alreadyChosen = true;
                             break;
                         }
                     }
-                }
-                System.out.println(duplicates.toString());
-                if (hasDuplicates) {
-                    JOptionPane.showMessageDialog(null, "You have already chosen this course");
-                    return;
-                } else {
-                    enrollment enroll = new enrollment(studentId, selectedCourses);
-                    String response = Client.sendEnrollment(enroll);
-                    if (response.equalsIgnoreCase("success")) {
-                        JOptionPane.showMessageDialog(null, "Successfully enrolled");
-                        
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Enrollment unsuccessful");
+
+                    if (!alreadyChosen) {
+                        selectedCourses.add(newCourse);
+                        newCourses.add(newCourse);
+                        dfmodel.addRow(new Object[]{courseId, courseName});
                     }
                 }
 
+                
+                if (newCourses.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "You have already chosen this course");
+                    return;
+                }
+
+                
+                enrollment enroll = new enrollment(studentId, newCourses);
+                String response = Client.sendEnrollment(enroll);
+
+                if (response.equalsIgnoreCase("success")) {
+                    JOptionPane.showMessageDialog(null, "Successfully enrolled");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Enrollment unsuccessful");
+                }
+                
             }
 
         });

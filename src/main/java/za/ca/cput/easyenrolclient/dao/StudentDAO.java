@@ -2,6 +2,7 @@ package za.ca.cput.easyenrolclient.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.JOptionPane;
@@ -11,7 +12,7 @@ import za.ca.cput.easyenrolclient.domain.Student;
 
 /**
  *
- * 
+ *
  */
 public class StudentDAO {
 
@@ -22,16 +23,29 @@ public class StudentDAO {
     public StudentDAO() {
         try {
             con = DBConnection.derbyConnection();
-        }  catch (Exception exception) {
+        } catch (Exception exception) {
             JOptionPane.showMessageDialog(null, exception.getMessage());
         }
     }
 
-    public void addStudent(Student student) {
-        String sql = "INSERT INTO student(STUDENT_ID, STUDENT_NAME, STUDENT_EMAIL, STUDENT_PASSWORD) VALUES (?,?,?,?)";
+    public String addStudent(Student student) {
+    String checkSql = "SELECT * FROM student WHERE STUDENTID = ? OR STUDENTEMAIL = ?";
+    String insertSql = "INSERT INTO student(STUDENTID, STUDENTNAME, STUDENTEMAIL, STUDENTPASSWORD) VALUES (?,?,?,?)";
 
-        try {
-            pstmt = con.prepareStatement(sql);
+    try (
+        PreparedStatement checkStmt = con.prepareStatement(checkSql)
+    ) {
+        
+        checkStmt.setInt(1, student.getStudentId());
+        checkStmt.setString(2, student.getEmail());
+        try (ResultSet rs = checkStmt.executeQuery()) {
+            if (rs.next()) {
+                return "duplicate";
+            }
+        }
+
+   
+        try (PreparedStatement pstmt = con.prepareStatement(insertSql)) {
             pstmt.setInt(1, student.getStudentId());
             pstmt.setString(2, student.getName());
             pstmt.setString(3, student.getEmail());
@@ -41,23 +55,23 @@ public class StudentDAO {
 
             if (ok > 0) {
                 JOptionPane.showMessageDialog(null, "Student successfully saved.");
+                return "success";
             } else {
                 JOptionPane.showMessageDialog(null, "Could not save the student.");
-            }
-        } catch (SQLException sqlException) {
-            JOptionPane.showMessageDialog(null, "SQL Error" + sqlException.getMessage());
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "SQL Error" + e.getMessage());
-        } finally {
-            try {
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-            } catch (Exception exception) {
-
+                return "failed";
             }
         }
+
+    } catch (SQLException sqlException) {
+        JOptionPane.showMessageDialog(null, "SQL Error: " + sqlException.getMessage());
+        return "error";
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
+        return "error";
     }
+}
+
+ 
 
     public void closeResources() {
         try {

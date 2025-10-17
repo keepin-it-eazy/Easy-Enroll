@@ -33,66 +33,101 @@ public class Login extends JFrame {
 
     public Login() {
         super();
-        try {
-            // Load Geist font once
-            geistFont = Font.createFont(Font.TRUETYPE_FONT, new java.io.File("C:\\Users\\samuk\\Downloads\\Geist\\Geist-VariableFont_wght.ttf"));
-        } catch (Exception e) {
-            e.printStackTrace();
-            geistFont = new Font("SansSerif", Font.PLAIN, 16); // fallback
-        }
+        
         setLayout(null);
         lblLogin = new JLabel("Login");
-        lblLogin.setFont(geistFont.deriveFont(Font.BOLD, 34f));
-        lblLogin.setForeground(Color.WHITE);
+        lblLogin.setFont(new Font("Arial",Font.BOLD, 36));
+        
         lblLogin.setBounds(160, 11, 251, 50);
 
         lblUsername = new JLabel("Username");
-        lblUsername.setFont(geistFont.deriveFont(Font.PLAIN, 20f));
-        lblUsername.setForeground(Color.WHITE);
+        lblUsername.setFont(new Font("Arial",Font.BOLD, 24));
+        
         lblUsername.setBounds(50, 90, 251, 50);
 
         txtUsername = new JTextField(15);
-        txtUsername.setBackground(Color.BLACK);
-        txtUsername.setForeground(Color.WHITE);
-        txtUsername.setCaretColor(Color.WHITE);
-        txtUsername.setBorder(new LineBorder(Color.GRAY, 3));
-        txtUsername.setBorder(BorderFactory.createCompoundBorder(new RoundedBorder(30), new EmptyBorder(5, 10, 5, 10)));
+        
         txtUsername.setBounds(40, 130, 270, 30);
 
         lblPassword = new JLabel("Password");
-        lblPassword.setFont(geistFont.deriveFont(Font.PLAIN, 20f));
-        lblPassword.setForeground(Color.WHITE);
+        lblPassword.setFont(new Font("Arial",Font.BOLD, 24));
+        
         lblPassword.setBounds(50, 160, 251, 50);
 
         txtPassword = new JTextField(15);
-        txtPassword.setBackground(Color.BLACK);
-        txtPassword.setForeground(Color.WHITE);
-        txtPassword.setCaretColor(Color.WHITE);
-        txtPassword.setBorder(new LineBorder(Color.GRAY, 3));
-        txtPassword.setBorder(BorderFactory.createCompoundBorder(new RoundedBorder(30), new EmptyBorder(5, 10, 5, 10)));
+        
+        
         txtPassword.setBounds(40, 200, 270, 30);
 
-        btnLogin = new RoundedButton("Login");
-        btnLogin.setFont(geistFont.deriveFont(Font.BOLD, 20f));
-        btnLogin.setFocusPainted(true);
-        btnLogin.setBorderPainted(true);
-        btnLogin.setForeground(Color.WHITE);
-        btnLogin.setBackground(new Color(41, 111, 208));
-        //btnLogin.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        // btnLogin.setBorder(new RoundedBorder(30));
+        btnLogin = new JButton("Login");
+        
         btnLogin.setBounds(98, 300, 200, 35);
+        btnLogin.addActionListener(new ActionListener() {
+    public void actionPerformed(ActionEvent e) {
+        String username = txtUsername.getText().trim();
+        String password = txtPassword.getText().trim();
 
+        // Input validation
+        if (username.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Username and password cannot be empty.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+            return;
+        }
+
+        int id;
+        try {
+            id = Integer.parseInt(username);
+        } catch (NumberFormatException nfe) {
+            JOptionPane.showMessageDialog(null, "Username must be a valid numeric ID.", "Input Error", JOptionPane.WARNING_MESSAGE);
+            txtUsername.setText("");
+            txtPassword.setText("");
+            return;
+        }
+
+        // Send credentials to server
+        String response = Client.communicate(id, password);
+
+        if ("student".equalsIgnoreCase(response)) {
+            JOptionPane.showMessageDialog(null, "Login successful!");
+            dispose(); 
+            
+            StudentGui myGUI = new StudentGui(id);
+            myGUI.setTitle("Client");
+            myGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            myGUI.setSize(500, 700);
+            myGUI.setVisible(true);
+        } else if ("admin".equalsIgnoreCase(response)) {
+            JOptionPane.showMessageDialog(null, "Login successful!");
+            dispose();
+            
+            AdminGui admin = new AdminGui();
+            admin.setTitle("Easy Enrol");
+            admin.setPreferredSize(new Dimension(600, 400)); 
+            admin.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            admin.setLocationRelativeTo(null);
+            admin.setResizable(true);
+            admin.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "Invalid credentials. Please try again.", "Login Failed", JOptionPane.ERROR_MESSAGE);
+            txtUsername.setText("");
+            txtPassword.setText("");
+        }
+    }
+});
+
+         /*
         btnLogin.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                
                 String username = txtUsername.getText();
+                int id = Integer.parseInt(username);
                 String password = txtPassword.getText();
-                String response = Client.communicate(username, password);
+                String response = Client.communicate(id, password);
 
                 if ("student".equalsIgnoreCase(response)) {
                     JOptionPane.showMessageDialog(null, "Login successful!");
                     dispose(); 
                     
-                    StudentGui myGUI = new StudentGui(username);
+                    StudentGui myGUI = new StudentGui(id);
                     myGUI.setTitle("Client");
                     myGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                     myGUI.setSize(500, 700);
@@ -114,16 +149,19 @@ public class Login extends JFrame {
                     txtUsername.setText("");
                     txtPassword.setText("");
                 }
+                
+                
 
             }
         });
+*/
         add(lblLogin);
         add(lblUsername);
         add(txtUsername);
         add(lblPassword);
         add(txtPassword);
         add(btnLogin);
-        getContentPane().setBackground(new Color(2, 0, 0));
+        
 
     }
 

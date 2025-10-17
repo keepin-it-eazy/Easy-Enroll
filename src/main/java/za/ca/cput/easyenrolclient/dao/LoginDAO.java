@@ -33,12 +33,12 @@ public class LoginDAO {
     }
     
     
-    public String authenticate(String username, String password) {
+    public String authenticate(int id, String password) {
         try {
             
-            String sql = "SELECT studentId, password FROM Student WHERE studentId = ? AND password = ?";
+            String sql = "SELECT studentId, StudentPassword FROM Student WHERE studentId = ? AND StudentPassword = ?";
             try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-                pstmt.setString(1, username);
+                pstmt.setInt(1, id);
                 pstmt.setString(2, password);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
@@ -48,9 +48,9 @@ public class LoginDAO {
             }
 
             
-            sql = "SELECT email, password FROM Admin WHERE email = ? AND password = ?";
+            sql = "SELECT adminId, password FROM Admin WHERE adminId = ? AND password = ?";
             try (PreparedStatement pstmt = con.prepareStatement(sql)) {
-                pstmt.setString(1, username);
+                pstmt.setInt(1, id);
                 pstmt.setString(2, password);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
@@ -62,7 +62,7 @@ public class LoginDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        //if there's no credentials in db then just return invalid
+        
         return "invalid"; 
     }
 }
