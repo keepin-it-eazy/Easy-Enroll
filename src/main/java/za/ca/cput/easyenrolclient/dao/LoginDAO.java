@@ -12,13 +12,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import za.ca.cput.easyenrolclient.connection.DBConnection;
 
-
 /**
  *
  * @author samuk
  */
 public class LoginDAO {
-    
+
     private Connection con;
     private ResultSet rs;
     private PreparedStatement pstmt;
@@ -31,30 +30,28 @@ public class LoginDAO {
             Logger.getLogger(LoginDAO.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    
+
     public String authenticate(int id, String password) {
         try {
-            
+
             String sql = "SELECT studentId, StudentPassword FROM Student WHERE studentId = ? AND StudentPassword = ?";
             try (PreparedStatement pstmt = con.prepareStatement(sql)) {
                 pstmt.setInt(1, id);
                 pstmt.setString(2, password);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        return "student"; 
+                        return "student";
                     }
                 }
             }
 
-            
             sql = "SELECT adminId, password FROM Admin WHERE adminId = ? AND password = ?";
             try (PreparedStatement pstmt = con.prepareStatement(sql)) {
                 pstmt.setInt(1, id);
                 pstmt.setString(2, password);
                 try (ResultSet rs = pstmt.executeQuery()) {
                     if (rs.next()) {
-                        return "admin"; 
+                        return "admin";
                     }
                 }
             }
@@ -62,10 +59,7 @@ public class LoginDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        
-        return "invalid"; 
+
+        return "invalid";
     }
 }
-
-    
-

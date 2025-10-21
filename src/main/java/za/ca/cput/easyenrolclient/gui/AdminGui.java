@@ -17,7 +17,7 @@ import za.ca.cput.easyenrolclient.domain.enrollment;
 public class AdminGui extends JFrame implements ActionListener {
 
     private JTabbedPane tabbedPane;
-    private JLabel lblStudName, lblStudID, lblEmail, lblPassword, lblCourseID, lblCourseCode, lblCourseName,lblSearchStudentID;
+    private JLabel lblStudName, lblStudID, lblEmail, lblPassword, lblCourseID, lblCourseCode, lblCourseName, lblSearchStudentID;
     private JTextField txtStudName, txtStudID, txtEmail, txtPassword, txtCourseID, txtCourseCode, txtCourseName;
     private JButton btnAddStudent, btnAddCourse, btnExitStudent, btnExitCourse, btnSearchStudent, btnSearchCourse;
     private StudentDAO sdao;
@@ -46,7 +46,6 @@ public class AdminGui extends JFrame implements ActionListener {
 
         tabbedPane = new JTabbedPane();
 
-        
         lblStudID = new JLabel("Student ID: ");
         lblStudName = new JLabel("Student Name: ");
         lblEmail = new JLabel("Email: ");
@@ -80,7 +79,6 @@ public class AdminGui extends JFrame implements ActionListener {
         pnlStudent.add(pnlStudentFields, BorderLayout.CENTER);
         pnlStudent.add(pnlStudentButtons, BorderLayout.SOUTH);
 
-        
         lblCourseID = new JLabel("Course ID: ");
         lblCourseCode = new JLabel("Course Code: ");
         lblCourseName = new JLabel("Course Name: ");
@@ -110,7 +108,6 @@ public class AdminGui extends JFrame implements ActionListener {
         pnlCourse.add(pnlCourseFields, BorderLayout.CENTER);
         pnlCourse.add(pnlCourseButtons, BorderLayout.SOUTH);
 
-        
         lblSearchStudentID = new JLabel("Enter Student ID:");
         txtSearchStudentID = new JTextField(10);
         btnSearchStudent = new JButton("Search");
@@ -123,28 +120,26 @@ public class AdminGui extends JFrame implements ActionListener {
         pnlStudentSearchTop.add(lblSearchStudentID);
         pnlStudentSearchTop.add(txtSearchStudentID);
         pnlStudentSearchTop.add(btnSearchStudent);
-        
+
         pnlSearchStudent.add(pnlStudentSearchTop, BorderLayout.NORTH);
         pnlSearchStudent.add(scrollStudentTable, BorderLayout.CENTER);
-        btnSearchStudent.addActionListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
+        btnSearchStudent.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 String id = txtSearchStudentID.getText().trim();
-                if (!id.isEmpty()){
-                    try{
+                if (!id.isEmpty()) {
+                    try {
                         int studentId = Integer.parseInt(id);
                         populateStudentEnrollmentTable(studentId);
-                    }catch (NumberFormatException nfe){
+                    } catch (NumberFormatException nfe) {
                         JOptionPane.showMessageDialog(null, "Student ID must be a number");
                     }
-                }else{
-                    JOptionPane.showMessageDialog(null,"Please enter a valid student id");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please enter a valid student id");
                 }
             }
-        
-        });
-        
 
-        
+        });
+
         JLabel lblSearchCourseID = new JLabel("Enter Course ID:");
         txtSearchCourseID = new JTextField(10);
         btnSearchCourse = new JButton("Search");
@@ -160,7 +155,6 @@ public class AdminGui extends JFrame implements ActionListener {
         pnlSearchCourse.add(pnlCourseSearchTop, BorderLayout.NORTH);
         pnlSearchCourse.add(scrollCourseTable, BorderLayout.CENTER);
 
-        
         tabbedPane.add("Students", pnlStudent);
         tabbedPane.add("Courses", pnlCourse);
         tabbedPane.add("Student Enrollments", pnlSearchStudent);
@@ -168,35 +162,32 @@ public class AdminGui extends JFrame implements ActionListener {
 
         this.add(pnlNorth, BorderLayout.NORTH);
         this.add(tabbedPane, BorderLayout.CENTER);
-        
-        
+
         btnSearchCourse.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-            String courseCode = txtSearchCourseID.getText().trim();
-            if (courseCode.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Please enter a course code.", "Validation Error", JOptionPane.WARNING_MESSAGE);
-                return;
+                String courseCode = txtSearchCourseID.getText().trim();
+                if (courseCode.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Please enter a course code.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+
+                ArrayList<Student> students = Client.getStudentsByCourse(courseCode);
+
+                courseTableModel.setRowCount(0);
+
+                for (Student s : students) {
+                    courseTableModel.addRow(new Object[]{
+                        s.getStudentId(),
+                        s.getName()
+                    });
+                }
+
+                if (students.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "No students found for course: " + courseCode, "Info", JOptionPane.INFORMATION_MESSAGE);
+                }
             }
+        });
 
-            ArrayList<Student> students = Client.getStudentsByCourse(courseCode);
-
-            
-            courseTableModel.setRowCount(0);
-
-            
-            for (Student s : students) {
-                courseTableModel.addRow(new Object[]{
-                    s.getStudentId(),
-                    s.getName()
-                });
-            }
-
-            if (students.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "No students found for course: " + courseCode, "Info", JOptionPane.INFORMATION_MESSAGE);
-            }
-        }
-});
-       
         btnAddStudent.addActionListener(this);
         btnExitStudent.addActionListener(this);
         btnAddCourse.addActionListener(this);
@@ -296,31 +287,30 @@ public class AdminGui extends JFrame implements ActionListener {
         txtCourseCode.setText("");
         txtCourseName.setText("");
     }
+
     private void populateStudentEnrollmentTable(int studentId) {
-    try {
-        
-        studentTableModel.setRowCount(0);
+        try {
 
-        
-        enrollment e = Client.getEnrollmentById(studentId);
+            studentTableModel.setRowCount(0);
 
-        
-        for (Course c : e.getCourses()) {
-            studentTableModel.addRow(new Object[]{c.getCourseCode(), c.getCourseName()});
+            enrollment e = Client.getEnrollmentById(studentId);
+
+            for (Course c : e.getCourses()) {
+                studentTableModel.addRow(new Object[]{c.getCourseCode(), c.getCourseName()});
+            }
+
+            if (e.getCourses().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "No courses found for student ID " + studentId,
+                        "No Data", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error retrieving student enrollment: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
         }
-
-        if (e.getCourses().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "No courses found for student ID " + studentId,
-                    "No Data", JOptionPane.INFORMATION_MESSAGE);
-        }
-
-    } catch (Exception ex) {
-        JOptionPane.showMessageDialog(this, "Error retrieving student enrollment: " + ex.getMessage(),
-                "Error", JOptionPane.ERROR_MESSAGE);
-        ex.printStackTrace();
     }
-}
-    
+
     public static void main(String[] args) {
         new AdminGui();
     }

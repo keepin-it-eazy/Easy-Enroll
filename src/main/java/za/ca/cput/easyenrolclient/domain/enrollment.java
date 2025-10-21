@@ -11,7 +11,7 @@ import java.util.ArrayList;
  *
  * @author 240971051
  */
-public class enrollment implements Serializable{
+public class enrollment implements Serializable {
 
     private int Studentid;
 
@@ -29,8 +29,6 @@ public class enrollment implements Serializable{
     public void setStudentid(int Studentid) {
         this.Studentid = Studentid;
     }
-
-    
 
     public ArrayList<Course> getCourses() {
         return courses;

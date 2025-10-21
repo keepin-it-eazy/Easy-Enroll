@@ -34,7 +34,7 @@ public class Server {
     private static ObjectInputStream in;
 
     public static void listen() {
-        
+
         try {
             listener = new ServerSocket(6666, 1);
             System.out.println("Server is listening");
@@ -49,8 +49,8 @@ public class Server {
             ioe.printStackTrace();
         }
     }
-   
-        private static void receiveData() {
+
+    private static void receiveData() {
         try {
             while (true) {
                 String command = (String) in.readObject(); // read the command
@@ -75,6 +75,7 @@ public class Server {
                         break;
                     case "getStudentsByCourse":
                         handleGetStudentsByCourse();
+                        break;
                     default:
                         out.writeObject("invalidCommand");
                         out.flush();
@@ -111,6 +112,7 @@ public class Server {
         System.out.println(response);
         out.flush();
     }
+
     private static void handleAddCourse() throws IOException, ClassNotFoundException {
         Course course = (Course) in.readObject();
         CourseDAO dao = new CourseDAO();
@@ -119,13 +121,14 @@ public class Server {
         System.out.println(response);
         out.flush();
     }
+
     private static void handleGetEnrollmentsById() throws IOException, ClassNotFoundException {
         try {
             int studentId = (Integer) in.readObject();
             enrollDao dao = new enrollDao();
-            
+
             enrollment e = dao.getEnrollmentsByStudentId(studentId);
-            
+
             out.writeObject(e);
             out.flush();
             System.out.println("Sent enrollment with " + e.getCourses().size() + " courses to client");
@@ -133,45 +136,45 @@ public class Server {
             Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
     public static void processCourseRetrieval() throws IOException {
-        
-            System.out.println("Processing course retrieval request...");
-            
-            CourseDAO courseDao = new CourseDAO();
-            ArrayList<Course> courses = courseDao.getAllCourses();
-            
-            out.writeObject(courses);
-            out.flush();
-            
-            System.out.println("Sent " + courses.size() + " courses to client");
-     }
-    private static void handleGetStudentsByCourse() throws IOException, ClassNotFoundException {
-    try {
-        String courseCode = (String) in.readObject(); 
-        enrollDao dao = new enrollDao();
-        ArrayList<Student> students = dao.getStudentsByCourse(courseCode);
-        
-        if (students == null) {
-            students = new ArrayList<>();
-        }
-        
-        out.writeObject(students); 
+
+        System.out.println("Processing course retrieval request...");
+
+        CourseDAO courseDao = new CourseDAO();
+        ArrayList<Course> courses = courseDao.getAllCourses();
+
+        out.writeObject(courses);
         out.flush();
 
-        System.out.println("Sent " + students.size() + " students for course " + courseCode);
-    } catch (SQLException ex) {
-        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-         out.writeObject(new ArrayList<Student>());
-         out.flush();
-    }catch (ClassCastException ex) {
-        Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
-        // Send empty list on unexpected input
-        out.writeObject(new ArrayList<Student>());
-        out.flush();
+        System.out.println("Sent " + courses.size() + " courses to client");
     }
-}
 
+    private static void handleGetStudentsByCourse() throws IOException, ClassNotFoundException {
+        try {
+            String courseCode = (String) in.readObject();
+            enrollDao dao = new enrollDao();
+            ArrayList<Student> students = dao.getStudentsByCourse(courseCode);
 
+            if (students == null) {
+                students = new ArrayList<>();
+            }
+
+            out.writeObject(students);
+            out.flush();
+
+            System.out.println("Sent " + students.size() + " students for course " + courseCode);
+        } catch (SQLException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            out.writeObject(new ArrayList<Student>());
+            out.flush();
+        } catch (ClassCastException ex) {
+            Logger.getLogger(Server.class.getName()).log(Level.SEVERE, null, ex);
+            // Send empty list on unexpected input
+            out.writeObject(new ArrayList<Student>());
+            out.flush();
+        }
+    }
 
     public static void main(String[] args) {
         Server.listen();

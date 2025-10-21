@@ -36,14 +36,13 @@ public class Client {
             out = new ObjectOutputStream(socket.getOutputStream());
             out.flush();
             in = new ObjectInputStream(socket.getInputStream());
-        
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }
 
     }
-    
-      
+
     public static String communicate(int id, String password) {
         try {
             out.writeObject("login");
@@ -57,7 +56,6 @@ public class Client {
         }
     }
 
-    
     public static String sendEnrollment(enrollment enroll) {
         try {
             out.writeObject("enroll");
@@ -70,7 +68,6 @@ public class Client {
         }
     }
 
-    
     public static String sendStudent(Student s) {
         try {
             out.writeObject("addStudent");
@@ -82,6 +79,7 @@ public class Client {
             return "failed";
         }
     }
+
     public static String sendCourse(Course c) {
         try {
             out.writeObject("addCourse");
@@ -93,29 +91,30 @@ public class Client {
             return "failed";
         }
     }
+
     public static ArrayList<Course> getAvailableCourses() {
         try {
-            
+
             out.writeObject("getCourses");
             out.flush();
-            
-            
+
             ArrayList<Course> courses = (ArrayList<Course>) in.readObject();
             System.out.println("Received " + courses.size() + " courses from server");
             return courses;
-            
+
         } catch (IOException | ClassNotFoundException ex) {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, "Error retrieving courses", ex);
             return new ArrayList<>(); // Return empty list on error
         }
     }
-    public static enrollment getEnrollmentById(int studentId){
+
+    public static enrollment getEnrollmentById(int studentId) {
         try {
             out.writeObject("getEnrollmentById");
             out.flush();
             out.writeObject(studentId);
             out.flush();
-            
+
             enrollment e = (enrollment) in.readObject();
             System.out.println("Received " + e.getCourses().size() + " enrolled courses for student " + studentId);
             return e;
@@ -123,35 +122,35 @@ public class Client {
             Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             return new enrollment(studentId, new ArrayList<>());
         }
-        
-    }
-    public static ArrayList<Student> getStudentsByCourse(String courseCode) {
-    try {
-        out.writeObject("getStudentsByCourse"); 
-        out.flush();
 
-        out.writeObject(courseCode); 
-        out.flush();
-        Object response = in.readObject();
-       
-        if (response instanceof ArrayList<?>) {
-           
-            ArrayList<Student> students = (ArrayList<Student>) response;
-            System.out.println("Received " + students.size() + " students for course " + courseCode);
-            return students;
-        } else {
-            
-            System.err.println("Unexpected server response: " + response);
-            JOptionPane.showMessageDialog(null, response.toString(), "Server Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public static ArrayList<Student> getStudentsByCourse(String courseCode) {
+        try {
+            out.writeObject("getStudentsByCourse");
+            out.flush();
+
+            out.writeObject(courseCode);
+            out.flush();
+            Object response = in.readObject();
+
+            if (response instanceof ArrayList<?>) {
+
+                ArrayList<Student> students = (ArrayList<Student>) response;
+                System.out.println("Received " + students.size() + " students for course " + courseCode);
+                return students;
+            } else {
+
+                System.err.println("Unexpected server response: " + response);
+                JOptionPane.showMessageDialog(null, response.toString(), "Server Error", JOptionPane.ERROR_MESSAGE);
+                return new ArrayList<>();
+            }
+
+        } catch (IOException | ClassNotFoundException ex) {
+            Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
             return new ArrayList<>();
         }
-
-    } catch (IOException | ClassNotFoundException ex) {
-        Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
-        return new ArrayList<>();
     }
-}
-
 
     public static void main(String[] args) {
 
@@ -163,5 +162,3 @@ public class Client {
         loginGUI.setVisible(true);
     }
 }
-
-

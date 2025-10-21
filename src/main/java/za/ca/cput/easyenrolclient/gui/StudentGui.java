@@ -44,9 +44,9 @@ public class StudentGui extends JFrame {
         pnl1.add(lbl);
 
         tpane = new JTabbedPane();
-        
+
         pnl2 = new JPanel();
-       
+
         String[] Column = {" Code", "Subject Name"};
         model = new DefaultTableModel(Column, 0);
         table = new JTable(model);
@@ -83,7 +83,7 @@ public class StudentGui extends JFrame {
         add(tpane);
 
         enroll.addActionListener(new ActionListener() {
-            
+
             public void actionPerformed(ActionEvent e) {
                 int[] selectedRows = table.getSelectedRows();
                 ArrayList<Course> newCourses = new ArrayList<>();
@@ -95,7 +95,6 @@ public class StudentGui extends JFrame {
                     Course newCourse = new Course(courseId, courseName);
                     boolean alreadyChosen = false;
 
-                    
                     for (Course c : selectedCourses) {
                         if (c.getCourseCode().equals(newCourse.getCourseCode())) {
                             alreadyChosen = true;
@@ -110,13 +109,11 @@ public class StudentGui extends JFrame {
                     }
                 }
 
-                
                 if (newCourses.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "You have already chosen this course");
                     return;
                 }
 
-                
                 enrollment enroll = new enrollment(studentId, newCourses);
                 String response = Client.sendEnrollment(enroll);
 
@@ -125,7 +122,7 @@ public class StudentGui extends JFrame {
                 } else {
                     JOptionPane.showMessageDialog(null, "Enrollment unsuccessful");
                 }
-                
+
             }
 
         });

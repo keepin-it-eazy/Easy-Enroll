@@ -72,7 +72,7 @@ public class enrollDao {
             pstmt.setInt(1, studentId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 while (rs.next()) {
-                   
+
                     Course c = new Course();
                     c.setCourseCode(rs.getString("courseCode"));
                     c.setCourseName(rs.getString("courseName"));

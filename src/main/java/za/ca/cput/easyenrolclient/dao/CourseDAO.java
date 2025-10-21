@@ -33,7 +33,7 @@ public class CourseDAO {
         String insertSql = "INSERT INTO course(courseid, courseCode, courseName) VALUES (?,?,?)";
 
         try (
-            PreparedStatement checkStmt = con.prepareStatement(checkSql)) {
+                PreparedStatement checkStmt = con.prepareStatement(checkSql)) {
 
             checkStmt.setString(1, course.getCourseCode());
             try (ResultSet rs = checkStmt.executeQuery()) {
@@ -48,9 +48,9 @@ public class CourseDAO {
                 pstmt.setString(3, course.getCourseName());
 
                 int ok = pstmt.executeUpdate();
-                if (ok > 0){
+                if (ok > 0) {
                     return "success";
-                }else{
+                } else {
                     return "failed";
                 }
             }
